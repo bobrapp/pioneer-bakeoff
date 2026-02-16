@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { GitBranch, ChevronRight, Circle, Activity } from "lucide-react";
+import { GitBranch, ChevronRight, Circle, Activity, Wifi, WifiOff } from "lucide-react";
 import { agents } from "@/lib/agentsData";
 import { agentColorMap, type AgentKey } from "@/lib/agents";
 import { getBakeoffs } from "@/services/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { checkWebhookConnection } from "@/services/webhookService";
 
 type NodeStatus = "idle" | "active" | "complete";
 
@@ -23,9 +24,18 @@ const Pipeline = () => {
   const [selected, setSelected] = useState<AgentKey | null>(null);
   const [loading, setLoading] = useState(true);
   const [recentBakeoffs, setRecentBakeoffs] = useState<number>(0);
+  const [webhookOnline, setWebhookOnline] = useState<boolean | null>(null);
   const { trackPageView } = useAnalytics();
 
   useEffect(() => { trackPageView("pipeline"); }, [trackPageView]);
+
+  // Poll webhook status every 30s
+  useEffect(() => {
+    const check = () => checkWebhookConnection().then(setWebhookOnline);
+    check();
+    const interval = setInterval(check, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -81,11 +91,25 @@ const Pipeline = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-3">
-        <GitBranch className="h-7 w-7 text-primary" />
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Pipeline</h2>
-          <p className="text-xs text-muted-foreground">Margaret's orchestration flow — {recentBakeoffs} bake-off{recentBakeoffs !== 1 ? "s" : ""} total</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <GitBranch className="h-7 w-7 text-primary" />
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Pipeline</h2>
+            <p className="text-xs text-muted-foreground">Margaret's orchestration flow — {recentBakeoffs} bake-off{recentBakeoffs !== 1 ? "s" : ""} total</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5">
+          {webhookOnline === null ? (
+            <Circle className="h-3 w-3 text-muted-foreground animate-pulse" />
+          ) : webhookOnline ? (
+            <Wifi className="h-4 w-4 text-agent-radia" />
+          ) : (
+            <WifiOff className="h-4 w-4 text-destructive" />
+          )}
+          <span className="text-xs font-medium text-muted-foreground">
+            n8n {webhookOnline === null ? "…" : webhookOnline ? "Connected" : "Offline"}
+          </span>
         </div>
       </div>
 

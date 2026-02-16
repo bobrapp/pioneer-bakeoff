@@ -3,6 +3,7 @@ import type { AgentData } from "@/lib/agentsData";
 import {
   Search, Shield, Network, Users, Cpu, Sparkles,
 } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const iconMap: Record<AgentKey, React.ElementType> = {
   ada: Search,
@@ -16,10 +17,16 @@ const iconMap: Record<AgentKey, React.ElementType> = {
 export function AgentCard({ agent }: { agent: AgentData }) {
   const colors = agentColorMap[agent.key];
   const Icon = iconMap[agent.key];
+  const { track } = useAnalytics();
+
+  const handleClick = () => {
+    track("agent_selected", { agent: agent.name, key: agent.key });
+  };
 
   return (
     <div
-      className={`group relative rounded-xl border-2 ${colors.border} bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:${colors.glow}`}
+      onClick={handleClick}
+      className={`group relative cursor-pointer rounded-xl border-2 ${colors.border} bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:${colors.glow}`}
     >
       {/* Accent top bar */}
       <div className={`absolute inset-x-0 top-0 h-1 rounded-t-xl ${colors.bg}`} style={{ backgroundColor: `hsl(var(--agent-${agent.key}))` }} />

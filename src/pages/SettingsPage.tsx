@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Settings, Eye, EyeOff, Save, Key, Webhook } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings, Eye, EyeOff, Save, Key, Webhook, Loader2 } from "lucide-react";
 import { getApiKeys, saveApiKeys, type ApiKeys } from "@/lib/apiKeys";
-import { getWebhookUrl, saveWebhookUrl } from "@/services/webhookService";
+import { getWebhookUrl, saveWebhookUrl, checkWebhookConnection } from "@/services/webhookService";
 import { toast } from "sonner";
 
 const keyFields: { id: keyof ApiKeys; label: string; placeholder: string }[] = [
@@ -14,6 +14,11 @@ const SettingsPage = () => {
   const [keys, setKeys] = useState<ApiKeys>(getApiKeys);
   const [visible, setVisible] = useState<Record<string, boolean>>({});
   const [webhookUrl, setWebhookUrl] = useState(getWebhookUrl);
+  const [webhookStatus, setWebhookStatus] = useState<"checking" | "online" | "offline">("checking");
+
+  useEffect(() => {
+    checkWebhookConnection().then((ok) => setWebhookStatus(ok ? "online" : "offline"));
+  }, []);
 
   const toggleVisibility = (id: string) =>
     setVisible((v) => ({ ...v, [id]: !v[id] }));
@@ -22,6 +27,8 @@ const SettingsPage = () => {
     saveApiKeys(keys);
     saveWebhookUrl(webhookUrl);
     toast.success("Settings saved.");
+    setWebhookStatus("checking");
+    checkWebhookConnection().then((ok) => setWebhookStatus(ok ? "online" : "offline"));
   };
 
   return (
@@ -76,9 +83,19 @@ const SettingsPage = () => {
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <Webhook className="h-5 w-5 text-primary" />
             n8n Webhook
+            {webhookStatus === "checking" ? (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            ) : (
+              <span className={`inline-flex h-2.5 w-2.5 rounded-full ${webhookStatus === "online" ? "bg-agent-radia" : "bg-destructive"}`} title={webhookStatus === "online" ? "Connected" : "Unreachable"} />
+            )}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Configure a webhook URL to receive automated notifications when bake-offs are started, completed, or results are exported.
+            {webhookStatus !== "checking" && (
+              <span className={`ml-1 font-medium ${webhookStatus === "online" ? "text-agent-radia" : "text-destructive"}`}>
+                ({webhookStatus === "online" ? "Connected" : "Unreachable"})
+              </span>
+            )}
           </p>
         </div>
         <div>

@@ -35,3 +35,19 @@ export function sendWebhook(event: WebhookEventType, data: Record<string, unknow
     console.warn(`[Webhook] Failed to send ${event}:`, err.message);
   });
 }
+
+export async function checkWebhookConnection(): Promise<boolean> {
+  const url = getWebhookUrl();
+  if (!url) return false;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event: "ping", timestamp: new Date().toISOString(), data: {} }),
+      signal: AbortSignal.timeout(5000),
+    });
+    return res.ok || res.status < 500;
+  } catch {
+    return false;
+  }
+}
