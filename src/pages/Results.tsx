@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { BarChart3, Loader2 } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { getBakeoffs, getResults } from "@/services/supabase";
 import type { ResultRow, BakeoffRow } from "@/lib/resultsHelpers";
 import { WinnerBanner } from "@/components/results/WinnerBanner";
@@ -13,6 +14,7 @@ import { HistoricalList } from "@/components/results/HistoricalList";
 type Tab = "results" | "history";
 
 const Results = () => {
+  const { trackPageView } = useAnalytics();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState<Tab>("results");
   const [bakeoffs, setBakeoffs] = useState<BakeoffRow[]>([]);
@@ -20,6 +22,8 @@ const Results = () => {
   const [selectedId, setSelectedId] = useState<string | null>(searchParams.get("bakeoff"));
   const [results, setResults] = useState<ResultRow[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => { trackPageView("results"); }, [trackPageView]);
 
   // Load all bakeoffs
   useEffect(() => {

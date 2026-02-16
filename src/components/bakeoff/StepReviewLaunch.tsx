@@ -4,6 +4,7 @@ import { Rocket, Clock, Cpu, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createBakeoff } from "@/services/supabase";
 import { hasAnyApiKey } from "@/lib/apiKeys";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface Props {
   config: BakeoffConfig;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function StepReviewLaunch({ config, onLaunched }: Props) {
+  const { track } = useAnalytics();
   const selectedModels: string[] = [];
   for (const [pid, models] of Object.entries(config.selectedProviders)) {
     const provider = aiProviders.find((p) => p.id === pid);
@@ -39,6 +41,7 @@ export function StepReviewLaunch({ config, onLaunched }: Props) {
     setLaunching(true);
     try {
       const bakeoff = await createBakeoff(config);
+      track("bakeoff_started", { bakeoff_id: bakeoff.id, agent_count: selectedModels.length, tests: config.selectedTests });
       toast.success("Bake-off created! Starting evaluation...");
       onLaunched(bakeoff.id);
     } catch (err: any) {

@@ -4,6 +4,7 @@ import { FlaskConical, Loader2, CheckCircle2, Clock, XCircle, Square } from "luc
 import { type AgentProgress, runEvaluation } from "@/services/evaluationEngine";
 import type { BakeoffConfig } from "@/lib/bakeoffConfig";
 import { hasAnyApiKey } from "@/lib/apiKeys";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface Props {
   bakeoffId: string;
@@ -21,6 +22,7 @@ export function BakeoffMonitor({ bakeoffId, config, onClose }: Props) {
   const logEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const isDemo = !hasAnyApiKey();
+  const { track } = useAnalytics();
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -29,7 +31,7 @@ export function BakeoffMonitor({ bakeoffId, config, onClose }: Props) {
     runEvaluation(bakeoffId, config, {
       onProgress: (a, p) => { setAgents(a); setPct(p); },
       onLog: (msg) => setLogs((l) => [...l, `[${new Date().toLocaleTimeString()}] ${msg}`]),
-      onComplete: () => setDone(true),
+      onComplete: () => { setDone(true); track("bakeoff_completed", { bakeoff_id: bakeoffId }); },
       onError: (err) => setError(err),
     }, ctrl.signal);
 

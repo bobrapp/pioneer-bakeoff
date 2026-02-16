@@ -4,6 +4,7 @@ import { agents } from "@/lib/agentsData";
 import { agentColorMap, type AgentKey } from "@/lib/agents";
 import { getBakeoffs } from "@/services/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 type NodeStatus = "idle" | "active" | "complete";
 
@@ -22,6 +23,9 @@ const Pipeline = () => {
   const [selected, setSelected] = useState<AgentKey | null>(null);
   const [loading, setLoading] = useState(true);
   const [recentBakeoffs, setRecentBakeoffs] = useState<number>(0);
+  const { trackPageView } = useAnalytics();
+
+  useEffect(() => { trackPageView("pipeline"); }, [trackPageView]);
 
   useEffect(() => {
     (async () => {
