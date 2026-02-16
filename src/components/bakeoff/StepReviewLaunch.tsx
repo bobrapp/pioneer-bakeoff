@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { aiProviders, evalCriteria, testTypes, type BakeoffConfig } from "@/lib/bakeoffConfig";
-import { Rocket, Clock, Cpu } from "lucide-react";
+import { Rocket, Clock, Cpu, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { createBakeoff } from "@/services/supabase";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   config: BakeoffConfig;
@@ -28,8 +31,20 @@ export function StepReviewLaunch({ config }: Props) {
 
   const estimatedMinutes = selectedModels.length * config.selectedTests.length * (config.complexity === "advanced" ? 5 : config.complexity === "standard" ? 3 : 1);
 
-  const handleLaunch = () => {
-    toast.success("Bake-off started!", { description: `Evaluating ${selectedModels.length} agents across ${config.selectedTests.length} tests.` });
+  const [launching, setLaunching] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLaunch = async () => {
+    setLaunching(true);
+    try {
+      await createBakeoff(config);
+      toast.success("Bake-off created!", { description: `Evaluating ${selectedModels.length} agents across ${config.selectedTests.length} tests.` });
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast.error("Failed to create bake-off", { description: err.message });
+    } finally {
+      setLaunching(false);
+    }
   };
 
   return (
@@ -91,10 +106,11 @@ export function StepReviewLaunch({ config }: Props) {
       <button
         type="button"
         onClick={handleLaunch}
-        className="w-full rounded-xl bg-primary py-4 text-lg font-bold text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-3 shadow-lg shadow-primary/20"
+        disabled={launching}
+        className="w-full rounded-xl bg-primary py-4 text-lg font-bold text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-3 shadow-lg shadow-primary/20 disabled:opacity-50"
       >
-        <Rocket className="h-6 w-6" />
-        Start Bake-off
+        {launching ? <Loader2 className="h-6 w-6 animate-spin" /> : <Rocket className="h-6 w-6" />}
+        {launching ? "Creating..." : "Start Bake-off"}
       </button>
     </div>
   );

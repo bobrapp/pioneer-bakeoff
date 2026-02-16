@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Bot, FlaskConical, LayoutDashboard, BarChart3, GitBranch } from "lucide-react";
+import { Bot, FlaskConical, LayoutDashboard, BarChart3, GitBranch, LogOut } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -9,7 +9,12 @@ const navItems = [
   { label: "Pipeline", path: "/pipeline", icon: GitBranch },
 ];
 
-export function AppHeader() {
+interface AppHeaderProps {
+  onSignOut?: () => void;
+  userEmail?: string;
+}
+
+export function AppHeader({ onSignOut, userEmail }: AppHeaderProps) {
   const { pathname } = useLocation();
 
   return (
@@ -46,6 +51,19 @@ export function AppHeader() {
             );
           })}
         </nav>
+
+        {userEmail && (
+          <div className="hidden md:flex items-center gap-3">
+            <span className="text-xs text-muted-foreground truncate max-w-[140px]">{userEmail}</span>
+            <button
+              onClick={onSignOut}
+              className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sign out
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
