@@ -1,8 +1,13 @@
+import { useEffect } from "react";
 import { agents } from "@/lib/agentsData";
 import { AgentCard } from "@/components/AgentCard";
 import { Bot } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const AgentGallery = () => {
+  const { trackPageView } = useAnalytics();
+  useEffect(() => { trackPageView("agent_gallery"); }, [trackPageView]);
+
   return (
     <div className="space-y-8">
       <div>

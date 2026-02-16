@@ -1,5 +1,6 @@
 import { aiProviders, type BakeoffConfig } from "@/lib/bakeoffConfig";
 import { Check, Globe } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface Props {
   config: BakeoffConfig;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function StepSelectAgents({ config, onChange }: Props) {
+  const { track } = useAnalytics();
   const totalSelected =
     Object.values(config.selectedProviders).reduce((sum, models) => sum + models.length, 0) +
     (config.customEndpointEnabled ? 1 : 0);
@@ -16,6 +18,9 @@ export function StepSelectAgents({ config, onChange }: Props) {
     const next = current.includes(model)
       ? current.filter((m) => m !== model)
       : [...current, model];
+    if (!current.includes(model)) {
+      track("agent_selected", { provider: providerId, model });
+    }
     const selectedProviders = { ...config.selectedProviders };
     if (next.length === 0) delete selectedProviders[providerId];
     else selectedProviders[providerId] = next;

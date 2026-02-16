@@ -3,6 +3,7 @@ import { LayoutDashboard, FlaskConical, Trophy, Clock, Zap, BarChart3 } from "lu
 import { useNavigate } from "react-router-dom";
 import { getBakeoffs, getResults } from "@/services/supabase";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface BakeoffSummary {
   id: string;
@@ -18,6 +19,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, mostTested: "—", highestScorer: "—", highestScore: 0 });
   const [recent, setRecent] = useState<BakeoffSummary[]>([]);
+
+  const { trackPageView } = useAnalytics();
+
+  useEffect(() => { trackPageView("dashboard"); }, [trackPageView]);
 
   useEffect(() => {
     (async () => {
