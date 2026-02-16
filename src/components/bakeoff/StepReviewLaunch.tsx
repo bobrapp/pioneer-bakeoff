@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { createBakeoff } from "@/services/supabase";
 import { hasAnyApiKey } from "@/lib/apiKeys";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { sendWebhook } from "@/services/webhookService";
 
 interface Props {
   config: BakeoffConfig;
@@ -42,6 +43,7 @@ export function StepReviewLaunch({ config, onLaunched }: Props) {
     try {
       const bakeoff = await createBakeoff(config);
       track("bakeoff_started", { bakeoff_id: bakeoff.id, agent_count: selectedModels.length, tests: config.selectedTests });
+      sendWebhook("bakeoff_started", { bakeoff_id: bakeoff.id, agents: selectedModels, tests: config.selectedTests });
       toast.success("Bake-off created! Starting evaluation...");
       onLaunched(bakeoff.id);
     } catch (err: any) {
