@@ -1,5 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Bot, FlaskConical, LayoutDashboard, BarChart3, GitBranch, LogOut, Settings } from "lucide-react";
+import { MobileNav } from "@/components/MobileNav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -20,12 +22,13 @@ export function AppHeader({ onSignOut, userEmail }: AppHeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
-      <div className="flex h-16 items-center justify-between px-6">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
+          <MobileNav />
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
             <FlaskConical className="h-5 w-5 text-primary" />
           </div>
-          <div>
+          <div className="hidden sm:block">
             <h1 className="text-lg font-bold leading-tight tracking-tight text-foreground">
               AI Agent Bake-off
             </h1>
@@ -53,18 +56,21 @@ export function AppHeader({ onSignOut, userEmail }: AppHeaderProps) {
           })}
         </nav>
 
-        {userEmail && (
-          <div className="hidden md:flex items-center gap-3">
-            <span className="text-xs text-muted-foreground truncate max-w-[140px]">{userEmail}</span>
-            <button
-              onClick={onSignOut}
-              className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              Sign out
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {userEmail && (
+            <div className="hidden md:flex items-center gap-3">
+              <span className="text-xs text-muted-foreground truncate max-w-[140px]">{userEmail}</span>
+              <button
+                onClick={onSignOut}
+                className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
