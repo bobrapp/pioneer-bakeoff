@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agents: {
+        Row: {
+          api_endpoint: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          model_version: string | null
+          name: string
+          provider: string
+        }
+        Insert: {
+          api_endpoint?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          model_version?: string | null
+          name: string
+          provider: string
+        }
+        Update: {
+          api_endpoint?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          model_version?: string | null
+          name?: string
+          provider?: string
+        }
+        Relationships: []
+      }
+      bakeoffs: {
+        Row: {
+          configuration: Json
+          created_at: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["bakeoff_status"]
+          user_id: string
+        }
+        Insert: {
+          configuration?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["bakeoff_status"]
+          user_id: string
+        }
+        Update: {
+          configuration?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["bakeoff_status"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      results: {
+        Row: {
+          agent_name: string
+          bakeoff_id: string
+          created_at: string
+          criteria_scores: Json
+          execution_time_ms: number
+          id: string
+          overall_score: number
+          provider: string
+          raw_response: string | null
+        }
+        Insert: {
+          agent_name: string
+          bakeoff_id: string
+          created_at?: string
+          criteria_scores?: Json
+          execution_time_ms?: number
+          id?: string
+          overall_score?: number
+          provider: string
+          raw_response?: string | null
+        }
+        Update: {
+          agent_name?: string
+          bakeoff_id?: string
+          created_at?: string
+          criteria_scores?: Json
+          execution_time_ms?: number
+          id?: string
+          overall_score?: number
+          provider?: string
+          raw_response?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_bakeoff_id_fkey"
+            columns: ["bakeoff_id"]
+            isOneToOne: false
+            referencedRelation: "bakeoffs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +126,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      bakeoff_status: "pending" | "running" | "completed" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +253,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      bakeoff_status: ["pending", "running", "completed", "failed"],
+    },
   },
 } as const
