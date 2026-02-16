@@ -12,6 +12,7 @@ import Dashboard from "@/pages/Dashboard";
 import RunBakeoff from "@/pages/RunBakeoff";
 import Results from "@/pages/Results";
 import Pipeline from "@/pages/Pipeline";
+import SettingsPage from "@/pages/SettingsPage";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +46,7 @@ function AppContent() {
             <Route path="/run" element={<RunBakeoff />} />
             <Route path="/results" element={<Results />} />
             <Route path="/pipeline" element={<Pipeline />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

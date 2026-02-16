@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   Bot, FlaskConical, LayoutDashboard, BarChart3, GitBranch,
-  ChevronLeft, ChevronRight, Circle,
+  ChevronLeft, ChevronRight, Circle, Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { agents } from "@/lib/agentsData";
@@ -13,6 +13,7 @@ const navItems = [
   { label: "Run Bake-off", path: "/run", icon: FlaskConical },
   { label: "Results", path: "/results", icon: BarChart3 },
   { label: "Pipeline", path: "/pipeline", icon: GitBranch },
+  { label: "Settings", path: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {

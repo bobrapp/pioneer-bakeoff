@@ -3,13 +3,14 @@ import { aiProviders, evalCriteria, testTypes, type BakeoffConfig } from "@/lib/
 import { Rocket, Clock, Cpu, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createBakeoff } from "@/services/supabase";
-import { useNavigate } from "react-router-dom";
+import { hasAnyApiKey } from "@/lib/apiKeys";
 
 interface Props {
   config: BakeoffConfig;
+  onLaunched: (bakeoffId: string) => void;
 }
 
-export function StepReviewLaunch({ config }: Props) {
+export function StepReviewLaunch({ config, onLaunched }: Props) {
   const selectedModels: string[] = [];
   for (const [pid, models] of Object.entries(config.selectedProviders)) {
     const provider = aiProviders.find((p) => p.id === pid);
@@ -30,19 +31,18 @@ export function StepReviewLaunch({ config }: Props) {
   );
 
   const estimatedMinutes = selectedModels.length * config.selectedTests.length * (config.complexity === "advanced" ? 5 : config.complexity === "standard" ? 3 : 1);
+  const isDemo = !hasAnyApiKey();
 
   const [launching, setLaunching] = useState(false);
-  const navigate = useNavigate();
 
   const handleLaunch = async () => {
     setLaunching(true);
     try {
-      await createBakeoff(config);
-      toast.success("Bake-off created!", { description: `Evaluating ${selectedModels.length} agents across ${config.selectedTests.length} tests.` });
-      navigate("/dashboard");
+      const bakeoff = await createBakeoff(config);
+      toast.success("Bake-off created! Starting evaluation...");
+      onLaunched(bakeoff.id);
     } catch (err: any) {
       toast.error("Failed to create bake-off", { description: err.message });
-    } finally {
       setLaunching(false);
     }
   };
@@ -53,6 +53,17 @@ export function StepReviewLaunch({ config }: Props) {
         <h3 className="text-lg font-bold text-foreground">Review & Launch</h3>
         <p className="text-sm text-muted-foreground">Confirm your configuration before starting.</p>
       </div>
+
+      {isDemo && (
+        <div className="rounded-xl border border-agent-anita/30 bg-agent-anita/5 p-4">
+          <p className="text-sm text-agent-anita font-medium">
+            🧪 Demo Mode — No API keys configured. Scores will be simulated from published benchmarks.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Add API keys in Settings to run live evaluations.
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-4">
@@ -73,7 +84,7 @@ export function StepReviewLaunch({ config }: Props) {
             <Clock className="h-4 w-4" />
             <span className="text-xs font-semibold uppercase tracking-wider">Est. Time</span>
           </div>
-          <p className="text-2xl font-bold text-foreground">~{estimatedMinutes} min</p>
+          <p className="text-2xl font-bold text-foreground">~{isDemo ? Math.ceil(selectedModels.length * 0.05) : estimatedMinutes} min</p>
           <p className="mt-2 text-xs text-muted-foreground">
             Complexity: <span className="capitalize text-foreground">{config.complexity}</span>
           </p>

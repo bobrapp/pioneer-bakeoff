@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Bot, FlaskConical, LayoutDashboard, BarChart3, GitBranch, LogOut } from "lucide-react";
+import { Bot, FlaskConical, LayoutDashboard, BarChart3, GitBranch, LogOut, Settings } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -7,6 +7,7 @@ const navItems = [
   { label: "Run Bake-off", path: "/run", icon: FlaskConical },
   { label: "Results", path: "/results", icon: BarChart3 },
   { label: "Pipeline", path: "/pipeline", icon: GitBranch },
+  { label: "Settings", path: "/settings", icon: Settings },
 ];
 
 interface AppHeaderProps {
