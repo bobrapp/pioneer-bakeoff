@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Settings, Eye, EyeOff, Save, Key, Webhook, Loader2 } from "lucide-react";
 import { getApiKeys, saveApiKeys, type ApiKeys } from "@/lib/apiKeys";
-import { getWebhookUrl, saveWebhookUrl, checkWebhookConnection } from "@/services/webhookService";
+import { getWebhookUrl, saveWebhookUrl, checkWebhookConnection, isValidWebhookUrl } from "@/services/webhookService";
 import { toast } from "sonner";
 
 const keyFields: { id: keyof ApiKeys; label: string; placeholder: string }[] = [
@@ -24,11 +24,15 @@ const SettingsPage = () => {
     setVisible((v) => ({ ...v, [id]: !v[id] }));
 
   const handleSave = () => {
-    saveApiKeys(keys);
-    saveWebhookUrl(webhookUrl);
-    toast.success("Settings saved.");
-    setWebhookStatus("checking");
-    checkWebhookConnection().then((ok) => setWebhookStatus(ok ? "online" : "offline"));
+    try {
+      saveApiKeys(keys);
+      saveWebhookUrl(webhookUrl);
+      toast.success("Settings saved.");
+      setWebhookStatus("checking");
+      checkWebhookConnection().then((ok) => setWebhookStatus(ok ? "online" : "offline"));
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save settings.");
+    }
   };
 
   return (
@@ -46,8 +50,11 @@ const SettingsPage = () => {
             API Keys
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Enter your API keys to run live evaluations. Keys are stored locally in your browser.
+            Enter your API keys to run live evaluations. Keys are stored in session storage and cleared when you close the browser tab.
             Without keys, bake-offs run in <span className="text-primary font-medium">Demo Mode</span> with simulated scores.
+          </p>
+          <p className="mt-1 text-xs text-yellow-600 dark:text-yellow-400">
+            ⚠️ API keys are stored client-side for convenience. Avoid entering keys on shared or untrusted devices.
           </p>
         </div>
 
@@ -90,12 +97,15 @@ const SettingsPage = () => {
             )}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Configure a webhook URL to receive automated notifications when bake-offs are started, completed, or results are exported.
+            Configure a webhook URL (HTTPS only) to receive automated notifications when bake-offs are started, completed, or results are exported.
             {webhookStatus !== "checking" && (
               <span className={`ml-1 font-medium ${webhookStatus === "online" ? "text-agent-radia" : "text-destructive"}`}>
                 ({webhookStatus === "online" ? "Connected" : "Unreachable"})
               </span>
             )}
+          </p>
+          <p className="mt-1 text-xs text-yellow-600 dark:text-yellow-400">
+            ⚠️ Summary data (IDs, counts, format) will be sent to this URL. No raw AI responses or API keys are included.
           </p>
         </div>
         <div>

@@ -8,7 +8,7 @@ export interface ApiKeys {
 
 export function getApiKeys(): ApiKeys {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return { openai: "", anthropic: "", google: "" };
     return JSON.parse(raw);
   } catch {
@@ -17,7 +17,11 @@ export function getApiKeys(): ApiKeys {
 }
 
 export function saveApiKeys(keys: ApiKeys) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(keys));
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(keys));
+}
+
+export function clearApiKeys() {
+  sessionStorage.removeItem(STORAGE_KEY);
 }
 
 export function hasAnyApiKey(): boolean {
